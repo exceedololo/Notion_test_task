@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/go-redis/redis"
 	"log"
 	"net/http"
 )
@@ -25,8 +27,17 @@ func WorkWithRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	//соединение с редис
+	client := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", host, port),
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
 	value := RequestMap[req.Key] + req.Value
 	RequestMap[req.Key] = value
+
 	resp := RequestOut{Value: value}
 	json.NewEncoder(w).Encode(resp)
 }
